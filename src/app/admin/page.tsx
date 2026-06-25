@@ -3,18 +3,19 @@
 import { useState, useEffect } from 'react';
 import { 
   Lock, Plus, Trash2, Save, ArrowLeft, Loader2, FileText, CheckSquare, 
-  Clock, Check, PlusCircle, AlertCircle, Link as LinkIcon 
+  Clock, Check, PlusCircle, AlertCircle, Download, Link as LinkIcon 
 } from 'lucide-react';
 import { 
   fetchAllProjects, saveProject, fetchRoadmap, saveRoadmapPhase, 
   deleteRoadmapPhase, fetchUpdates, addUpdate, deleteUpdate, 
   fetchPendingItems, addPendingItem, deletePendingItem, 
-  fetchAgencyFiles, addAgencyFile, deleteAgencyFile, fetchClientUploads
+  fetchAgencyFiles, addAgencyFile, uploadAgencyFile, deleteAgencyFile, fetchClientUploads
 } from '@/lib/firebase';
 import type { 
   Project, RoadmapPhase, Update, PendingItem, ClientUpload, AgencyFile, Task 
 } from '@/types';
 import StatusBadge from '@/components/ui-custom/StatusBadge';
+import AgencyFileUploader from '@/components/ui-custom/AgencyFileUploader';
 
 export default function AdminPage() {
   // Auth state
@@ -922,83 +923,104 @@ export default function AdminPage() {
                           <p className="text-xs text-gray-400">Provide file downloads (URLs) for client files.</p>
                         </div>
 
-                        <form onSubmit={handleAddAgencyFile} className="space-y-2 border border-gray-100 p-3 rounded-xl bg-gray-50/50">
-                          <input
-                            type="text"
-                            required
-                            placeholder="File name (e.g. Brand Guidelines.pdf)"
-                            value={newFileName}
-                            onChange={(e) => setNewFileName(e.target.value)}
-                            className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none"
-                          />
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              required
-                              placeholder="Public download URL link…"
-                              value={newFileUrl}
-                              onChange={(e) => setNewFileUrl(e.target.value)}
-                              className="flex-1 px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none"
-                            />
-                            <button
-                              type="submit"
-                              className="px-3 py-1.5 bg-gray-900 text-white rounded-lg text-xs font-semibold hover:bg-gray-800"
-                            >
-                              Share File
-                            </button>
-                          </div>
-                        </form>
+                        <AgencyFileUploader
+                          onUpload={async (file, onProgress) => {
+                            if (!selectedProjectId) throw new Error('No project selected');
+                            const added = await uploadAgencyFile(selectedProjectId, file, onProgress);
+                            setAgencyFiles(prev => [...prev, added]);
+                            return added;
+                          }}
+                          onUploadLink={async (fileName, fileURL) => {
+                            if (!selectedProjectId) throw new Error('No project selected');
+                            const added = await addAgencyFile(selectedProjectId, fileName, fileURL);
+                            setAgencyFiles(prev => [...prev, added]);
+                            return added;
+                          }}
+                        />
 
                         <div className="space-y-2">
                           <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Uploaded by Agency</h4>
                           {agencyFiles.length === 0 ? (
                             <p className="text-xs text-gray-400 italic py-2">No files shared yet.</p>
                           ) : (
-                            agencyFiles.map(file => (
-                              <div key={file.id} className="flex items-center justify-between p-2.5 border border-gray-100 rounded-xl bg-white text-xs">
-                                <span className="font-medium text-gray-700 flex items-center gap-1.5 truncate">
-                                  <FileText size={12} className="text-gray-400 shrink-0" />
-                                  {file.fileName}
-                                </span>
-                                <div className="flex items-center gap-1">
-                                  <a href={file.fileURL} target="_blank" rel="noreferrer" className="p-1 text-gray-400 hover:text-gray-800">
-                                    <LinkIcon size={12} />
-                                  </a>
-                                  <button
-                                    onClick={() => handleDeleteAgencyFile(file.id)}
-                                    className="p-1 text-gray-400 hover:text-red-500 rounded"
-                                  >
-                                    <Trash2 size={12} />
-                                  </button>
+                            agencyFiles.map(file => {
+                              const isData = file.fileURL && file.fileURL.startsWith('data:');
+                              return (
+                                <div key={file.id} className="flex items-center justify-between p-2.5 border border-gray-100 rounded-xl bg-white text-xs">
+                                  <span className="font-medium text-gray-700 flex items-center gap-1.5 truncate">
+                                    <FileText size={12} className="text-gray-400 shrink-0" />
+                                    {file.fileName}
+                                  </span>
+                                  <div className="flex items-center gap-1">
+                                    {isData ? (
+                                      <a 
+                                        href={file.fileURL} 
+                                        download={file.fileName}
+                                        className="p-1 text-gray-400 hover:text-gray-800"
+                                        title="Download File"
+                                      >
+                                        <Download size={12} />
+                                      </a>
+                                    ) : (
+                                      <a 
+                                        href={file.fileURL} 
+                                        target="_blank" 
+                                        rel="noreferrer" 
+                                        className="p-1 text-gray-400 hover:text-gray-800"
+                                        title="Open Link"
+                                      >
+                                        <LinkIcon size={12} />
+                                      </a>
+                                    )}
+                                    <button
+                                      onClick={() => handleDeleteAgencyFile(file.id)}
+                                      className="p-1 text-gray-400 hover:text-red-500 rounded"
+                                    >
+                                      <Trash2 size={12} />
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            ))
+                              );
+                            })
                           )}
 
                           <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pt-2 border-t border-gray-100">Uploaded by Client</h4>
                           {clientUploads.length === 0 ? (
                             <p className="text-xs text-gray-400 italic py-2">Client has not uploaded any assets yet.</p>
                           ) : (
-                            clientUploads.map(upload => (
-                              <div key={upload.id} className="flex items-center justify-between p-2.5 border border-gray-100 rounded-xl bg-white text-xs">
-                                <div className="space-y-0.5 truncate">
-                                  <p className="font-semibold text-gray-700 truncate">{upload.fileName}</p>
-                                  <div className="flex items-center gap-1.5 text-[9px] text-gray-400">
-                                    <span>Uploaded: {new Date(upload.uploadedAt).toLocaleDateString()}</span>
-                                    <span>•</span>
-                                    <span className="font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider">{upload.category || 'Other'}</span>
+                            clientUploads.map(upload => {
+                              const isData = upload.fileURL && upload.fileURL.startsWith('data:');
+                              return (
+                                <div key={upload.id} className="flex items-center justify-between p-2.5 border border-gray-100 rounded-xl bg-white text-xs">
+                                  <div className="space-y-0.5 truncate">
+                                    <p className="font-semibold text-gray-700 truncate">{upload.fileName}</p>
+                                    <div className="flex items-center gap-1.5 text-[9px] text-gray-400">
+                                      <span>Uploaded: {new Date(upload.uploadedAt).toLocaleDateString()}</span>
+                                      <span>•</span>
+                                      <span className="font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider">{upload.category || 'Other'}</span>
+                                    </div>
                                   </div>
+                                  {isData ? (
+                                    <a 
+                                      href={upload.fileURL} 
+                                      download={upload.fileName}
+                                      className="px-2 py-1 bg-gray-100 text-gray-700 font-semibold rounded text-[10px] hover:bg-gray-200 whitespace-nowrap"
+                                    >
+                                      Download
+                                    </a>
+                                  ) : (
+                                    <a 
+                                      href={upload.fileURL} 
+                                      target="_blank" 
+                                      rel="noreferrer" 
+                                      className="px-2 py-1 bg-gray-100 text-gray-700 font-semibold rounded text-[10px] hover:bg-gray-200 whitespace-nowrap"
+                                    >
+                                      Open Link
+                                    </a>
+                                  )}
                                 </div>
-                                <a 
-                                  href={upload.fileURL} 
-                                  target="_blank" 
-                                  rel="noreferrer" 
-                                  className="px-2 py-1 bg-gray-100 text-gray-700 font-semibold rounded text-[10px] hover:bg-gray-200 whitespace-nowrap"
-                                >
-                                  Download
-                                </a>
-                              </div>
-                            ))
+                              );
+                            })
                           )}
                         </div>
                       </div>

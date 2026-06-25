@@ -184,6 +184,42 @@ export async function addAgencyFile(projectId: string, fileName: string, fileURL
   return { id: ref2.id, fileName, fileURL };
 }
 
+export async function uploadAgencyFile(
+  projectId: string,
+  file: File,
+  onProgress: (pct: number) => void,
+): Promise<AgencyFile> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    let currentPct = 0;
+    const interval = setInterval(() => {
+      currentPct = Math.min(currentPct + 25, 95);
+      onProgress(currentPct);
+    }, 100);
+
+    reader.onload = async () => {
+      clearInterval(interval);
+      onProgress(100);
+      try {
+        const fileURL = reader.result as string;
+        const ref2 = await addDoc(
+          collection(db, 'projects', projectId, 'agencyFiles'),
+          { fileName: file.name, fileURL },
+        );
+        resolve({ id: ref2.id, fileName: file.name, fileURL });
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = (err) => {
+      clearInterval(interval);
+      reject(err);
+    };
+  });
+}
+
 export async function deleteAgencyFile(projectId: string, fileId: string): Promise<void> {
   await deleteDoc(doc(db, 'projects', projectId, 'agencyFiles', fileId));
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, File, CheckCircle, X, Link as LinkIcon, Paperclip } from 'lucide-react';
+import { Upload, File, CheckCircle, X, Link as LinkIcon, Paperclip, Download } from 'lucide-react';
 import type { ClientUpload } from '@/types';
 
 type UploadFn = (
@@ -327,6 +327,7 @@ export default function FileUploader({
                   <div className="space-y-1">
                     {catUploads.map((u) => {
                       const isLink = u.fileURL && (u.fileURL.startsWith('http') || u.fileURL.startsWith('#'));
+                      const isData = u.fileURL && u.fileURL.startsWith('data:');
                       
                       return (
                         <div key={u.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-gray-100 bg-white text-xs">
@@ -347,15 +348,26 @@ export default function FileUploader({
                               })}
                             </span>
                             {u.fileURL && u.fileURL !== '#' && (
-                              <a 
-                                href={u.fileURL} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="p-1 text-gray-400 hover:text-gray-800 border border-gray-100 rounded bg-gray-50/50 hover:bg-gray-50 flex items-center justify-center"
-                                title="Download / Open Link"
-                              >
-                                {isLink ? <LinkIcon size={12} /> : <Upload size={12} />}
-                              </a>
+                              isData ? (
+                                <a 
+                                  href={u.fileURL} 
+                                  download={u.fileName}
+                                  className="p-1 text-gray-400 hover:text-gray-800 border border-gray-100 rounded bg-gray-50/50 hover:bg-gray-50 flex items-center justify-center"
+                                  title="Download File"
+                                >
+                                  <Download size={12} />
+                                </a>
+                              ) : (
+                                <a 
+                                  href={u.fileURL} 
+                                  target="_blank" 
+                                  rel="noreferrer" 
+                                  className="p-1 text-gray-400 hover:text-gray-800 border border-gray-100 rounded bg-gray-50/50 hover:bg-gray-50 flex items-center justify-center"
+                                  title="Open Link"
+                                >
+                                  {isLink ? <LinkIcon size={12} /> : <Upload size={12} />}
+                                </a>
+                              )
                             )}
                           </div>
                         </div>
