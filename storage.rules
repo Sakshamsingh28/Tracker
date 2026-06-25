@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Clients can upload to their project's folder
+    match /projects/{projectId}/client-uploads/{fileName} {
+      allow read:   if true;
+      allow write:  if request.resource.size < 50 * 1024 * 1024; // 50 MB limit
+    }
+
+    // Agency files: read-only for everyone (write via Firebase console)
+    match /{allPaths=**} {
+      allow read:  if true;
+      allow write: if false;
+    }
+  }
+}
