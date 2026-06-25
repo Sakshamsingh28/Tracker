@@ -54,9 +54,9 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
       setProgress(null);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
+    } catch (err: any) {
       setProgress(null);
-      setError('Upload failed. Please check file size and try again.');
+      setError(`Upload failed: ${err?.message || 'Please check file size and try again.'}`);
     }
   };
 
