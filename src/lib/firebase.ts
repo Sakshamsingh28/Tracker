@@ -74,6 +74,7 @@ export async function fetchClientUploads(projectId: string): Promise<ClientUploa
 export async function uploadClientFile(
   projectId: string,
   file: File,
+  category: string,
   onProgress: (pct: number) => void,
 ): Promise<ClientUpload> {
   const storageRef = ref(
@@ -92,9 +93,9 @@ export async function uploadClientFile(
         const uploadedAt = new Date().toISOString();
         const ref2 = await addDoc(
           collection(db, 'projects', projectId, 'clientUploads'),
-          { fileName: file.name, fileURL, uploadedAt },
+          { fileName: file.name, fileURL, uploadedAt, category },
         );
-        resolve({ id: ref2.id, fileName: file.name, fileURL, uploadedAt });
+        resolve({ id: ref2.id, fileName: file.name, fileURL, uploadedAt, category });
       },
     );
   });

@@ -36,6 +36,7 @@ export interface ClientUpload {
   fileName: string;
   fileURL: string;
   uploadedAt: string;
+  category: string;
 }
 
 export interface AgencyFile {

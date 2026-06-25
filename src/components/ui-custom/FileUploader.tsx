@@ -4,13 +4,26 @@ import { useState, useRef } from 'react';
 import { Upload, File, CheckCircle, X } from 'lucide-react';
 import type { ClientUpload } from '@/types';
 
-type UploadFn = (file: File, onProgress: (pct: number) => void) => Promise<ClientUpload>;
+type UploadFn = (
+  file: File, 
+  category: string, 
+  onProgress: (pct: number) => void
+) => Promise<ClientUpload>;
 
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/png', 'image/webp', 'image/gif',
   'application/pdf',
   'application/zip', 'application/x-zip-compressed',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+
+const CATEGORIES = [
+  'Logo & Branding',
+  'Photos & Imagery',
+  'Copywriting & Content',
+  'Billing & Invoices',
+  'Feedback & Mockups',
+  'Other Assets',
 ];
 
 function FileTypeIcon({ name }: { name: string }) {
@@ -31,6 +44,7 @@ export default function FileUploader({
   existingUploads: ClientUpload[];
   isDemo: boolean;
 }) {
+  const [category, setCategory] = useState(CATEGORIES[0]);
   const [progress, setProgress] = useState<number | null>(null);
   const [success,  setSuccess]  = useState(false);
   const [error,    setError]    = useState<string | null>(null);
@@ -62,6 +76,7 @@ export default function FileUploader({
         fileName: file.name,
         fileURL: '#',
         uploadedAt: new Date().toISOString(),
+        category,
       };
       setUploads((p) => [fake, ...p]);
       setProgress(null);
@@ -71,7 +86,7 @@ export default function FileUploader({
     }
 
     try {
-      const result = await onUpload(file, setProgress);
+      const result = await onUpload(file, category, setProgress);
       setUploads((p) => [result, ...p]);
       setProgress(null);
       setSuccess(true);
@@ -91,6 +106,24 @@ export default function FileUploader({
 
   return (
     <div className="space-y-4">
+      {/* Category Dropdown Selector */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest">
+          Select Asset Category
+        </label>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all cursor-pointer font-medium"
+        >
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Drop zone */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
@@ -128,7 +161,7 @@ export default function FileUploader({
       {progress !== null && (
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-gray-400">
-            <span>Uploading…</span>
+            <span>Uploading to "{category}"…</span>
             <span>{progress}%</span>
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -158,24 +191,77 @@ export default function FileUploader({
         </div>
       )}
 
-      {/* File list */}
+      {/* File list grouped by category */}
       {uploads.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-            Uploaded Files
+        <div className="space-y-4 pt-2">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
+            Uploaded Client Assets
           </p>
-          {uploads.map((u) => (
-            <div key={u.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50">
-              <FileTypeIcon name={u.fileName} />
-              <span className="text-sm text-gray-700 truncate flex-1">{u.fileName}</span>
-              <span className="text-xs text-gray-400 shrink-0">
-                {new Date(u.uploadedAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                })}
-              </span>
-            </div>
-          ))}
+          
+          <div className="space-y-3">
+            {CATEGORIES.map((cat) => {
+              const catUploads = uploads.filter(
+                (u) => u.category === cat || (!u.category && cat === 'Other Assets')
+              );
+              if (catUploads.length === 0) return null;
+
+              return (
+                <div key={cat} className="space-y-1.5">
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1">
+                    {cat}
+                  </h4>
+                  <div className="space-y-1">
+                    {catUploads.map((u) => (
+                      <div key={u.id} className="flex items-center justify-between px-3 py-2 rounded-xl border border-gray-100 bg-white text-xs">
+                        <div className="flex items-center gap-2.5 truncate">
+                          <FileTypeIcon name={u.fileName} />
+                          <span className="text-sm font-medium text-gray-700 truncate">{u.fileName}</span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 shrink-0">
+                          {new Date(u.uploadedAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Handle legacy or unmapped categories */}
+            {(() => {
+              const legacyUploads = uploads.filter(
+                (u) => u.category && !CATEGORIES.includes(u.category)
+              );
+              if (legacyUploads.length === 0) return null;
+
+              return (
+                <div className="space-y-1.5">
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1">
+                    Misc Uploads
+                  </h4>
+                  <div className="space-y-1">
+                    {legacyUploads.map((u) => (
+                      <div key={u.id} className="flex items-center justify-between px-3 py-2 rounded-xl border border-gray-100 bg-white text-xs">
+                        <div className="flex items-center gap-2.5 truncate">
+                          <FileTypeIcon name={u.fileName} />
+                          <span className="text-sm font-medium text-gray-700 truncate">{u.fileName}</span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 shrink-0">
+                          {new Date(u.uploadedAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
         </div>
       )}
     </div>

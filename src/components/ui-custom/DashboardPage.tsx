@@ -19,7 +19,7 @@ interface DashboardPageProps {
   pendingItems:  PendingItem[];
   clientUploads: ClientUpload[];
   agencyFiles:   AgencyFile[];
-  onUpload:      (file: File, onProgress: (pct: number) => void) => Promise<ClientUpload>;
+  onUpload:      (file: File, category: string, onProgress: (pct: number) => void) => Promise<ClientUpload>;
   onBack:        () => void;
   isDemo:        boolean;
 }

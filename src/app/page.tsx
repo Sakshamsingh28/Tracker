@@ -85,10 +85,11 @@ export default function Home() {
 
   const handleUpload = async (
     file: File,
+    category: string,
     onProgress: (pct: number) => void,
   ): Promise<ClientUpload> => {
     if (!data) throw new Error('No project loaded');
-    return uploadClientFile(data.projectId, file, onProgress);
+    return uploadClientFile(data.projectId, file, category, onProgress);
   };
 
   const handleBack = () => {

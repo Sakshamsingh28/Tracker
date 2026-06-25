@@ -983,7 +983,11 @@ export default function AdminPage() {
                               <div key={upload.id} className="flex items-center justify-between p-2.5 border border-gray-100 rounded-xl bg-white text-xs">
                                 <div className="space-y-0.5 truncate">
                                   <p className="font-semibold text-gray-700 truncate">{upload.fileName}</p>
-                                  <p className="text-[9px] text-gray-400">Uploaded: {new Date(upload.uploadedAt).toLocaleDateString()}</p>
+                                  <div className="flex items-center gap-1.5 text-[9px] text-gray-400">
+                                    <span>Uploaded: {new Date(upload.uploadedAt).toLocaleDateString()}</span>
+                                    <span>•</span>
+                                    <span className="font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider">{upload.category || 'Other'}</span>
+                                  </div>
                                 </div>
                                 <a 
                                   href={upload.fileURL} 
