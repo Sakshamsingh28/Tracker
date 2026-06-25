@@ -373,7 +373,7 @@ export default function AdminPage() {
   // --- Login Render ---
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-100/50 to-zinc-50 flex flex-col items-center justify-center px-4">
         <div className="mb-8 flex items-center gap-2">
           <div className="flex gap-1">
             <span className="w-2.5 h-2.5 rounded-full bg-gray-900 inline-block" />
@@ -384,7 +384,7 @@ export default function AdminPage() {
           </span>
         </div>
 
-        <div className="w-full max-w-md bg-white rounded-2xl border border-gray-100 shadow-[0_4px_30px_0_rgba(0,0,0,0.05)] p-8">
+        <div className="w-full max-w-md border border-white/60 bg-white/70 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-8">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-gray-100 rounded-full text-gray-700">
               <Lock size={24} />
@@ -403,7 +403,7 @@ export default function AdminPage() {
               placeholder="Admin passcode…"
               value={passcode}
               onChange={(e) => setPasscode(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200/60 bg-white/40 backdrop-blur-sm text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-transparent transition-all"
               autoFocus
             />
             {authError && (
@@ -425,9 +425,9 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-100/50 to-zinc-50 flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
+      <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-md border-b border-gray-200/50 shadow-[0_2px_15px_0_rgba(0,0,0,0.02)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
@@ -467,7 +467,7 @@ export default function AdminPage() {
         
         {/* Left Sidebar: Projects List */}
         <aside className="w-full md:w-80 shrink-0">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col h-[600px]">
+          <div className="border border-white/60 bg-white/70 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-4 flex flex-col h-[600px]">
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">Projects</h2>
               <button
@@ -522,7 +522,7 @@ export default function AdminPage() {
           
           {/* Create Project Panel */}
           {isCreatingProject ? (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-xl">
+            <div className="border border-white/60 bg-white/70 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-6 max-w-xl">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">Create a New Client Project</h2>
               <p className="text-xs text-gray-400 mb-6">This registers a document in Firestore. Clients login using the Unique ID.</p>
               
@@ -598,7 +598,7 @@ export default function AdminPage() {
           ) : selectedProjectId && projectForm ? (
             
             /* Main Project Editor */
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+            <div className="border border-white/60 bg-white/70 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-6 flex flex-col">
               
               {/* Active Project Card Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-4 mb-6 gap-4">
@@ -1078,7 +1078,7 @@ export default function AdminPage() {
             </div>
           ) : (
             /* Selected state placeholder */
-            <div className="h-[600px] border border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3">
+            <div className="h-[600px] border border-dashed border-gray-250/80 bg-white/30 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3">
               <FolderOpen size={36} className="text-gray-300" />
               <div className="text-center">
                 <h3 className="text-sm font-semibold text-gray-900 mb-0.5">No Project Selected</h3>

@@ -41,9 +41,9 @@ export default function DashboardPage({
   project, roadmap, updates, pendingItems, clientUploads, agencyFiles, onUpload, onUploadLink, onBack, isDemo,
 }: DashboardPageProps) {
   return (
-    <div className="min-h-screen bg-[#f9f9f9]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-100/50 to-zinc-50">
       {/* Sticky nav */}
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <header className="sticky top-0 z-10 bg-white/70 backdrop-blur-md border-b border-gray-200/50 shadow-[0_2px_15px_0_rgba(0,0,0,0.02)]">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={onBack}
@@ -75,7 +75,7 @@ export default function DashboardPage({
 
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-4 pb-16">
         {/* ── Hero Card ─────────────────────────────────────────── */}
-        <div className="rounded-2xl border border-gray-100 bg-white shadow-[0_1px_12px_0_rgba(0,0,0,0.04)] p-6">
+        <div className="rounded-2xl border border-white/60 bg-white/70 backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-6">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
               <p className="text-xs text-gray-400 font-medium mb-1">{project.clientName}</p>
@@ -96,7 +96,7 @@ export default function DashboardPage({
 
         {/* ── Current Phase + Task ───────────────────────────────── */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-gray-100 bg-white shadow-[0_1px_12px_0_rgba(0,0,0,0.04)] p-5">
+          <div className="rounded-2xl border border-white/60 bg-white/70 backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-5">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
               Current Phase
             </p>
@@ -104,7 +104,7 @@ export default function DashboardPage({
               {project.currentPhase}
             </p>
           </div>
-          <div className="rounded-2xl border border-gray-100 bg-white shadow-[0_1px_12px_0_rgba(0,0,0,0.04)] p-5">
+          <div className="rounded-2xl border border-white/60 bg-white/70 backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-5">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
               Current Task
             </p>
@@ -116,7 +116,7 @@ export default function DashboardPage({
 
         {/* ── Waiting For You ────────────────────────────────────── */}
         {pendingItems.length > 0 && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
+          <div className="rounded-2xl border border-amber-200/50 bg-amber-50/70 backdrop-blur-md shadow-[0_8px_32px_0_rgba(245,158,11,0.02)] p-6">
             <div className="flex items-center gap-2 mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
               <h2 className="text-xs font-semibold text-amber-700 uppercase tracking-widest">

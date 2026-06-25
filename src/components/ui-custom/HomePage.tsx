@@ -15,7 +15,7 @@ export default function HomePage({ onSubmit }: HomePageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-100/50 to-zinc-50 flex flex-col items-center justify-center px-4">
       {/* Wordmark */}
       <div className="mb-10 flex items-center gap-2.5">
         <div className="flex gap-1">
@@ -29,7 +29,7 @@ export default function HomePage({ onSubmit }: HomePageProps) {
 
       {/* Card */}
       <div className="w-full max-w-sm">
-        <div className="rounded-2xl border border-gray-100 bg-white shadow-[0_2px_24px_0_rgba(0,0,0,0.06)] p-8">
+        <div className="rounded-2xl border border-white/60 bg-white/70 backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-8">
           <h1 className="text-[1.4rem] font-semibold text-gray-900 mb-1 tracking-tight">
             Track Your Project
           </h1>
@@ -43,7 +43,7 @@ export default function HomePage({ onSubmit }: HomePageProps) {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder="Project name…"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200/60 bg-white/40 backdrop-blur-sm text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-transparent transition-all"
               autoFocus
             />
             <button

@@ -77,36 +77,33 @@ export async function uploadClientFile(
   category: string,
   onProgress: (pct: number) => void,
 ): Promise<ClientUpload> {
+  const fileRef = ref(storage, `projects/${projectId}/client-uploads/client_${Date.now()}_${file.name}`);
+  const uploadTask = uploadBytesResumable(fileRef, file);
+
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-
-    // Simulate progress bar loading animation
-    let currentPct = 0;
-    const interval = setInterval(() => {
-      currentPct = Math.min(currentPct + 25, 95);
-      onProgress(currentPct);
-    }, 100);
-
-    reader.onload = async () => {
-      clearInterval(interval);
-      onProgress(100);
-      try {
-        const fileURL = reader.result as string;
-        const uploadedAt = new Date().toISOString();
-        const ref2 = await addDoc(
-          collection(db, 'projects', projectId, 'clientUploads'),
-          { fileName: file.name, fileURL, uploadedAt, category },
-        );
-        resolve({ id: ref2.id, fileName: file.name, fileURL, uploadedAt, category });
-      } catch (err) {
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        onProgress(Math.round(pct));
+      },
+      (err) => {
         reject(err);
+      },
+      async () => {
+        try {
+          const fileURL = await getDownloadURL(uploadTask.snapshot.ref);
+          const uploadedAt = new Date().toISOString();
+          const ref2 = await addDoc(
+            collection(db, 'projects', projectId, 'clientUploads'),
+            { fileName: file.name, fileURL, uploadedAt, category },
+          );
+          resolve({ id: ref2.id, fileName: file.name, fileURL, uploadedAt, category });
+        } catch (err) {
+          reject(err);
+        }
       }
-    };
-    reader.onerror = (err) => {
-      clearInterval(interval);
-      reject(err);
-    };
+    );
   });
 }
 
@@ -189,34 +186,32 @@ export async function uploadAgencyFile(
   file: File,
   onProgress: (pct: number) => void,
 ): Promise<AgencyFile> {
+  const fileRef = ref(storage, `projects/${projectId}/client-uploads/agency_${Date.now()}_${file.name}`);
+  const uploadTask = uploadBytesResumable(fileRef, file);
+
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-
-    let currentPct = 0;
-    const interval = setInterval(() => {
-      currentPct = Math.min(currentPct + 25, 95);
-      onProgress(currentPct);
-    }, 100);
-
-    reader.onload = async () => {
-      clearInterval(interval);
-      onProgress(100);
-      try {
-        const fileURL = reader.result as string;
-        const ref2 = await addDoc(
-          collection(db, 'projects', projectId, 'agencyFiles'),
-          { fileName: file.name, fileURL },
-        );
-        resolve({ id: ref2.id, fileName: file.name, fileURL });
-      } catch (err) {
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        onProgress(Math.round(pct));
+      },
+      (err) => {
         reject(err);
+      },
+      async () => {
+        try {
+          const fileURL = await getDownloadURL(uploadTask.snapshot.ref);
+          const ref2 = await addDoc(
+            collection(db, 'projects', projectId, 'agencyFiles'),
+            { fileName: file.name, fileURL },
+          );
+          resolve({ id: ref2.id, fileName: file.name, fileURL });
+        } catch (err) {
+          reject(err);
+        }
       }
-    };
-    reader.onerror = (err) => {
-      clearInterval(interval);
-      reject(err);
-    };
+    );
   });
 }
 

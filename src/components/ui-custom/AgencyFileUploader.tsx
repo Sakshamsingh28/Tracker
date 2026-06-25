@@ -39,9 +39,9 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
       setError('File type not supported. Upload images, PDF, ZIP, or DOCX.');
       return;
     }
-    // Firestore Document Limit is 1MB. Safe limit is 800KB for base64
-    if (file.size > 800 * 1024) {
-      setError('Direct file upload is limited to 800 KB for free hosting. For larger files, please paste a shareable link under the "Share Link" tab!');
+    // Direct file upload is now backed by Firebase Storage (2 MB limit)
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Direct file upload is limited to 2 MB. For larger files, please paste a shareable link under the "Share Link" tab!');
       return;
     }
 
@@ -99,7 +99,7 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
             uploadMode === 'file' ? 'border-gray-900 text-gray-900 font-bold' : 'border-transparent text-gray-400 hover:text-gray-600'
           }`}
         >
-          Upload File (&lt;800KB)
+          Upload File (&lt;2MB)
         </button>
         <button
           type="button"
@@ -119,10 +119,10 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           onClick={() => inputRef.current?.click()}
-          className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all select-none
+          className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all select-none backdrop-blur-sm
             ${dragging
-              ? 'border-gray-900 bg-gray-50'
-              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+              ? 'border-gray-900 bg-gray-900/[0.03]'
+              : 'border-gray-200/60 hover:border-gray-300/80 hover:bg-white/40'
             }`}
         >
           <input
@@ -143,7 +143,7 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
             <p className="text-sm font-medium text-gray-900">Drop your file here</p>
             <p className="text-xs text-gray-400 mt-0.5">or click to browse</p>
           </div>
-          <p className="text-[11px] text-gray-300 mt-1">Images · PDF · DOCX (under 800 KB)</p>
+          <p className="text-[11px] text-gray-300 mt-1">Images · PDF · DOCX (under 2 MB)</p>
         </div>
       )}
 
@@ -160,7 +160,7 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
               placeholder="e.g. Brand Guidelines, Design Asset"
               value={linkName}
               onChange={(e) => setLinkName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              className="w-full px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
             />
           </div>
           <div>
@@ -174,7 +174,7 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
                 placeholder="e.g. https://drive.google.com/..."
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                className="flex-1 px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
               />
               <button
                 type="submit"
