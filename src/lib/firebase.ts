@@ -77,28 +77,51 @@ export async function uploadClientFile(
   category: string,
   onProgress: (pct: number) => void,
 ): Promise<ClientUpload> {
-  const storageRef = ref(
-    storage,
-    `projects/${projectId}/client-uploads/${Date.now()}_${file.name}`,
-  );
-  const task = uploadBytesResumable(storageRef, file);
-
   return new Promise((resolve, reject) => {
-    task.on(
-      'state_changed',
-      (snap) => onProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
-      reject,
-      async () => {
-        const fileURL = await getDownloadURL(task.snapshot.ref);
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    // Simulate progress bar loading animation
+    let currentPct = 0;
+    const interval = setInterval(() => {
+      currentPct = Math.min(currentPct + 25, 95);
+      onProgress(currentPct);
+    }, 100);
+
+    reader.onload = async () => {
+      clearInterval(interval);
+      onProgress(100);
+      try {
+        const fileURL = reader.result as string;
         const uploadedAt = new Date().toISOString();
         const ref2 = await addDoc(
           collection(db, 'projects', projectId, 'clientUploads'),
           { fileName: file.name, fileURL, uploadedAt, category },
         );
         resolve({ id: ref2.id, fileName: file.name, fileURL, uploadedAt, category });
-      },
-    );
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = (err) => {
+      clearInterval(interval);
+      reject(err);
+    };
   });
+}
+
+export async function addClientUploadLink(
+  projectId: string,
+  fileName: string,
+  fileURL: string,
+  category: string,
+): Promise<ClientUpload> {
+  const uploadedAt = new Date().toISOString();
+  const ref2 = await addDoc(
+    collection(db, 'projects', projectId, 'clientUploads'),
+    { fileName, fileURL, uploadedAt, category },
+  );
+  return { id: ref2.id, fileName, fileURL, uploadedAt, category };
 }
 
 // ─── Agency Files ─────────────────────────────────────────────────────────

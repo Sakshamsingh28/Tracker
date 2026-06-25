@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, File, CheckCircle, X } from 'lucide-react';
+import { Upload, File, CheckCircle, X, Link as LinkIcon, Paperclip } from 'lucide-react';
 import type { ClientUpload } from '@/types';
 
 type UploadFn = (
@@ -37,13 +37,16 @@ function FileTypeIcon({ name }: { name: string }) {
 
 export default function FileUploader({
   onUpload,
+  onUploadLink,
   existingUploads,
   isDemo,
 }: {
   onUpload: UploadFn;
+  onUploadLink: (fileName: string, fileURL: string, category: string) => Promise<ClientUpload>;
   existingUploads: ClientUpload[];
   isDemo: boolean;
 }) {
+  const [uploadMode, setUploadMode] = useState<'file' | 'link'>('file');
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [progress, setProgress] = useState<number | null>(null);
   const [success,  setSuccess]  = useState(false);
@@ -52,13 +55,19 @@ export default function FileUploader({
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handle = async (file: File) => {
+  // Link input states
+  const [linkName, setLinkName] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkLoading, setLinkLoading] = useState(false);
+
+  const handleFileUpload = async (file: File) => {
     if (!ALLOWED_TYPES.includes(file.type)) {
       setError('File type not supported. Upload images, PDF, ZIP, or DOCX.');
       return;
     }
-    if (file.size > 50 * 1024 * 1024) {
-      setError('File too large. Maximum size is 50 MB.');
+    // Firestore Document Limit is 1MB. Safe limit is 800KB for base64
+    if (file.size > 800 * 1024) {
+      setError('Direct file upload is limited to 800 KB for free hosting. For larger files, please paste a shareable link under the "Share Link" tab!');
       return;
     }
 
@@ -91,9 +100,48 @@ export default function FileUploader({
       setProgress(null);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch {
+    } catch (err) {
       setProgress(null);
-      setError('Upload failed. Please try again.');
+      setError('Upload failed. Please check file size and try again.');
+    }
+  };
+
+  const handleLinkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!linkName.trim() || !linkUrl.trim()) return;
+
+    setError(null);
+    setSuccess(false);
+    setLinkLoading(true);
+
+    if (isDemo) {
+      const fake: ClientUpload = {
+        id: Date.now().toString(),
+        fileName: linkName.trim(),
+        fileURL: linkUrl.trim(),
+        uploadedAt: new Date().toISOString(),
+        category,
+      };
+      setUploads((p) => [fake, ...p]);
+      setSuccess(true);
+      setLinkName('');
+      setLinkUrl('');
+      setLinkLoading(false);
+      setTimeout(() => setSuccess(false), 3000);
+      return;
+    }
+
+    try {
+      const result = await onUploadLink(linkName.trim(), linkUrl.trim(), category);
+      setUploads((p) => [result, ...p]);
+      setSuccess(true);
+      setLinkName('');
+      setLinkUrl('');
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError('Failed to save link. Please try again.');
+    } finally {
+      setLinkLoading(false);
     }
   };
 
@@ -101,7 +149,7 @@ export default function FileUploader({
     e.preventDefault();
     setDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file) handle(file);
+    if (file) handleFileUpload(file);
   };
 
   return (
@@ -124,44 +172,110 @@ export default function FileUploader({
         </select>
       </div>
 
-      {/* Drop zone */}
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        onClick={() => inputRef.current?.click()}
-        className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all select-none
-          ${dragging
-            ? 'border-gray-900 bg-gray-50'
-            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+      {/* Mode Selector Tabs */}
+      <div className="flex border-b border-gray-100 gap-4">
+        <button
+          type="button"
+          onClick={() => { setUploadMode('file'); setError(null); }}
+          className={`pb-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all ${
+            uploadMode === 'file' ? 'border-gray-900 text-gray-900 font-bold' : 'border-transparent text-gray-400 hover:text-gray-600'
           }`}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.zip,.docx"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) handle(f);
-            e.target.value = '';
-          }}
-        />
-        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-          <Upload size={16} className="text-gray-500" />
-        </div>
-        <div className="text-center">
-          <p className="text-sm font-medium text-gray-900">Drop your file here</p>
-          <p className="text-xs text-gray-400 mt-0.5">or click to browse</p>
-        </div>
-        <p className="text-[11px] text-gray-300 mt-1">Images · PDF · ZIP · DOCX · Max 50 MB</p>
+        >
+          Upload File (&lt;800KB)
+        </button>
+        <button
+          type="button"
+          onClick={() => { setUploadMode('link'); setError(null); }}
+          className={`pb-2 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all ${
+            uploadMode === 'link' ? 'border-gray-900 text-gray-900 font-bold' : 'border-transparent text-gray-400 hover:text-gray-600'
+          }`}
+        >
+          Share Link (Any Size)
+        </button>
       </div>
+
+      {/* File Upload Mode */}
+      {uploadMode === 'file' && (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          onClick={() => inputRef.current?.click()}
+          className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all select-none
+            ${dragging
+              ? 'border-gray-900 bg-gray-50'
+              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+            }`}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.zip,.docx"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFileUpload(f);
+              e.target.value = '';
+            }}
+          />
+          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+            <Upload size={16} className="text-gray-500" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-medium text-gray-900">Drop your file here</p>
+            <p className="text-xs text-gray-400 mt-0.5">or click to browse</p>
+          </div>
+          <p className="text-[11px] text-gray-300 mt-1">Images · PDF · DOCX (under 800 KB)</p>
+        </div>
+      )}
+
+      {/* Link Share Mode */}
+      {uploadMode === 'link' && (
+        <form onSubmit={handleLinkSubmit} className="space-y-3 p-4 border border-gray-100 rounded-xl bg-white">
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
+              File Description / Name
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Acme Brand Guide, Raw Video Asset"
+              value={linkName}
+              onChange={(e) => setLinkName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-900"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
+              Paste Shareable URL Link
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                required
+                placeholder="e.g. https://drive.google.com/..."
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              />
+              <button
+                type="submit"
+                disabled={linkLoading}
+                className="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold hover:bg-gray-800 disabled:opacity-40"
+              >
+                Add Link
+              </button>
+            </div>
+            <p className="text-[10px] text-gray-300 mt-1">Share folders or assets using Google Drive, Dropbox, Figma, etc.</p>
+          </div>
+        </form>
+      )}
 
       {/* Progress bar */}
       {progress !== null && (
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-gray-400">
-            <span>Uploading to "{category}"…</span>
+            <span>Optimizing and saving to "{category}"…</span>
             <span>{progress}%</span>
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -177,7 +291,7 @@ export default function FileUploader({
       {success && (
         <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 px-4 py-2.5 rounded-lg">
           <CheckCircle size={14} />
-          Upload successful
+          Asset shared successfully!
         </div>
       )}
 
@@ -185,7 +299,7 @@ export default function FileUploader({
       {error && (
         <div className="flex items-center justify-between text-sm text-red-700 bg-red-50 px-4 py-2.5 rounded-lg">
           <span>{error}</span>
-          <button onClick={() => setError(null)}>
+          <button type="button" onClick={() => setError(null)}>
             <X size={14} />
           </button>
         </div>
@@ -211,20 +325,42 @@ export default function FileUploader({
                     {cat}
                   </h4>
                   <div className="space-y-1">
-                    {catUploads.map((u) => (
-                      <div key={u.id} className="flex items-center justify-between px-3 py-2 rounded-xl border border-gray-100 bg-white text-xs">
-                        <div className="flex items-center gap-2.5 truncate">
-                          <FileTypeIcon name={u.fileName} />
-                          <span className="text-sm font-medium text-gray-700 truncate">{u.fileName}</span>
+                    {catUploads.map((u) => {
+                      const isLink = u.fileURL && (u.fileURL.startsWith('http') || u.fileURL.startsWith('#'));
+                      
+                      return (
+                        <div key={u.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-gray-100 bg-white text-xs">
+                          <div className="flex items-center gap-2.5 truncate">
+                            {isLink ? (
+                              <Paperclip size={13} className="text-gray-400 shrink-0" />
+                            ) : (
+                              <FileTypeIcon name={u.fileName} />
+                            )}
+                            <span className="text-sm font-medium text-gray-700 truncate">{u.fileName}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-gray-400 shrink-0">
+                              {new Date(u.uploadedAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </span>
+                            {u.fileURL && u.fileURL !== '#' && (
+                              <a 
+                                href={u.fileURL} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="p-1 text-gray-400 hover:text-gray-800 border border-gray-100 rounded bg-gray-50/50 hover:bg-gray-50 flex items-center justify-center"
+                                title="Download / Open Link"
+                              >
+                                {isLink ? <LinkIcon size={12} /> : <Upload size={12} />}
+                              </a>
+                            )}
+                          </div>
                         </div>
-                        <span className="text-[10px] text-gray-400 shrink-0">
-                          {new Date(u.uploadedAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );

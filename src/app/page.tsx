@@ -9,7 +9,7 @@ import type {
 } from '@/types';
 import {
   fetchProject, fetchRoadmap, fetchUpdates, fetchPendingItems,
-  fetchClientUploads, uploadClientFile, fetchAgencyFiles,
+  fetchClientUploads, uploadClientFile, fetchAgencyFiles, addClientUploadLink,
 } from '@/lib/firebase';
 import {
   DEMO_PROJECT_ID,
@@ -92,6 +92,15 @@ export default function Home() {
     return uploadClientFile(data.projectId, file, category, onProgress);
   };
 
+  const handleUploadLink = async (
+    fileName: string,
+    fileURL: string,
+    category: string,
+  ): Promise<ClientUpload> => {
+    if (!data) throw new Error('No project loaded');
+    return addClientUploadLink(data.projectId, fileName, fileURL, category);
+  };
+
   const handleBack = () => {
     setView('home');
     setData(null);
@@ -137,6 +146,7 @@ export default function Home() {
       <DashboardPage
         {...data}
         onUpload={handleUpload}
+        onUploadLink={handleUploadLink}
         onBack={handleBack}
       />
     );

@@ -20,6 +20,7 @@ interface DashboardPageProps {
   clientUploads: ClientUpload[];
   agencyFiles:   AgencyFile[];
   onUpload:      (file: File, category: string, onProgress: (pct: number) => void) => Promise<ClientUpload>;
+  onUploadLink:  (fileName: string, fileURL: string, category: string) => Promise<ClientUpload>;
   onBack:        () => void;
   isDemo:        boolean;
 }
@@ -37,7 +38,7 @@ function relativeDate(iso: string) {
 }
 
 export default function DashboardPage({
-  project, roadmap, updates, pendingItems, clientUploads, agencyFiles, onUpload, onBack, isDemo,
+  project, roadmap, updates, pendingItems, clientUploads, agencyFiles, onUpload, onUploadLink, onBack, isDemo,
 }: DashboardPageProps) {
   return (
     <div className="min-h-screen bg-[#f9f9f9]">
@@ -147,6 +148,7 @@ export default function DashboardPage({
         <Section title="Upload Assets">
           <FileUploader
             onUpload={onUpload}
+            onUploadLink={onUploadLink}
             existingUploads={clientUploads}
             isDemo={isDemo}
           />
