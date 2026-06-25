@@ -496,10 +496,10 @@ export default function AdminPage() {
                       setSelectedProjectId(p.id);
                       setIsCreatingProject(false);
                     }}
-                    className={`w-full text-left px-3 py-3 rounded-xl border transition-all flex flex-col gap-1.5 ${
+                    className={`w-full text-left px-3 py-3 rounded-xl border transition-all flex flex-col gap-1.5 backdrop-blur-sm ${
                       selectedProjectId === p.id 
-                        ? 'border-gray-900 bg-gray-50/80 shadow-sm' 
-                        : 'border-transparent hover:bg-gray-50/50'
+                        ? 'border-gray-900/30 bg-white/60 shadow-sm' 
+                        : 'border-transparent hover:bg-white/30 hover:border-white/20'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -899,7 +899,7 @@ export default function AdminPage() {
                             <p className="text-xs text-gray-400 italic py-4 text-center">No updates logged.</p>
                           ) : (
                             updates.map(upd => (
-                              <div key={upd.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-white text-xs">
+                              <div key={upd.id} className="flex items-center justify-between p-3 border border-white/40 rounded-xl bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                                 <div className="space-y-0.5">
                                   <p className="font-semibold text-gray-900">{upd.title}</p>
                                   <p className="text-[10px] text-gray-400">{new Date(upd.date).toLocaleDateString()}</p>
@@ -946,7 +946,7 @@ export default function AdminPage() {
                             agencyFiles.map(file => {
                               const isData = file.fileURL && file.fileURL.startsWith('data:');
                               return (
-                                <div key={file.id} className="flex items-center justify-between p-2.5 border border-gray-100 rounded-xl bg-white text-xs">
+                                <div key={file.id} className="flex items-center justify-between p-2.5 border border-white/40 rounded-xl bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                                   <span className="font-medium text-gray-700 flex items-center gap-1.5 truncate">
                                     <FileText size={12} className="text-gray-400 shrink-0" />
                                     {file.fileName}
@@ -991,7 +991,7 @@ export default function AdminPage() {
                             clientUploads.map(upload => {
                               const isData = upload.fileURL && upload.fileURL.startsWith('data:');
                               return (
-                                <div key={upload.id} className="flex items-center justify-between p-2.5 border border-gray-100 rounded-xl bg-white text-xs">
+                                <div key={upload.id} className="flex items-center justify-between p-2.5 border border-white/40 rounded-xl bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                                   <div className="space-y-0.5 truncate">
                                     <p className="font-semibold text-gray-700 truncate">{upload.fileName}</p>
                                     <div className="flex items-center gap-1.5 text-[9px] text-gray-400">
@@ -1057,7 +1057,7 @@ export default function AdminPage() {
                           <p className="text-xs text-gray-400 italic py-4 text-center">No action requests pending.</p>
                         ) : (
                           pendingItems.map(item => (
-                            <div key={item.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-white text-xs">
+                            <div key={item.id} className="flex items-center justify-between p-3 border border-white/40 rounded-xl bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                               <span className="font-medium text-gray-800">{item.item}</span>
                               <button
                                 onClick={() => handleDeletePendingItem(item.id)}

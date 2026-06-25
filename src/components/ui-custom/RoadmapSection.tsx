@@ -25,10 +25,10 @@ export default function RoadmapSection({ phases }: { phases: RoadmapPhase[] }) {
         const isOpen = openId === phase.id;
 
         return (
-          <div key={phase.id} className="rounded-xl border border-gray-100 overflow-hidden">
+          <div key={phase.id} className="rounded-xl border border-white/40 bg-white/20 backdrop-blur-sm overflow-hidden shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
             <button
               onClick={() => setOpenId(isOpen ? null : phase.id)}
-              className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-gray-50 transition-colors"
+              className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-white/30 transition-colors"
             >
               <span className="shrink-0 w-7 h-7 rounded-full bg-gray-100 text-xs font-semibold text-gray-500 flex items-center justify-center">
                 {i + 1}
@@ -71,8 +71,8 @@ export default function RoadmapSection({ phases }: { phases: RoadmapPhase[] }) {
                       <span
                         className={`shrink-0 w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold ${
                           task.completed
-                            ? 'bg-emerald-50 text-emerald-600'
-                            : 'bg-gray-100 text-transparent'
+                            ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600'
+                            : 'bg-white/40 border border-gray-200/50 text-transparent'
                         }`}
                       >
                         ✓

@@ -330,7 +330,7 @@ export default function FileUploader({
                       const isData = u.fileURL && u.fileURL.startsWith('data:');
                       
                       return (
-                        <div key={u.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-gray-100 bg-white text-xs">
+                        <div key={u.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-white/40 bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                           <div className="flex items-center gap-2.5 truncate">
                             {isLink ? (
                               <Paperclip size={13} className="text-gray-400 shrink-0" />

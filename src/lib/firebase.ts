@@ -34,6 +34,7 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 export const db      = getFirestore(app);
 export const storage = getStorage(app);
+storage.maxUploadRetryTime = 15000; // 15 seconds max upload retry time
 
 // ─── Project ──────────────────────────────────────────────────────────────
 export async function fetchProject(projectId: string): Promise<Project | null> {

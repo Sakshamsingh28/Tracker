@@ -21,7 +21,7 @@ export default function UpdatesTimeline({ updates }: { updates: Update[] }) {
       <ul className="space-y-5">
         {updates.map((u) => (
           <li key={u.id} className="relative flex gap-4 items-start">
-            <div className="absolute -left-5 top-[5px] w-2 h-2 rounded-full bg-gray-900 ring-2 ring-white" />
+            <div className="absolute -left-5 top-[5px] w-2 h-2 rounded-full bg-gray-900 ring-2 ring-white/40 backdrop-blur-sm" />
             <div className="flex-1 min-w-0">
               <p className="text-sm text-gray-900 font-medium leading-snug">{u.title}</p>
               <p className="text-xs text-gray-400 mt-0.5">{relativeDate(u.date)}</p>
