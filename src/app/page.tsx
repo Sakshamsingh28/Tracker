@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HomePage from '@/components/ui-custom/HomePage';
 import DashboardPage from '@/components/ui-custom/DashboardPage';
 import DashboardSkeleton from '@/components/ui-custom/DashboardSkeleton';
@@ -31,7 +31,7 @@ interface DashboardData {
 }
 
 export default function Home() {
-  const [view, setView] = useState<View>('home');
+  const [view, setView] = useState<View>('loading');
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,6 +52,7 @@ export default function Home() {
         projectId,
         isDemo: true,
       });
+      localStorage.setItem('client_project_id', projectId);
       setView('dashboard');
       return;
     }
@@ -59,6 +60,7 @@ export default function Home() {
     try {
       const project = await fetchProject(projectId);
       if (!project) {
+        localStorage.removeItem('client_project_id');
         setView('not-found');
         return;
       }
@@ -75,13 +77,24 @@ export default function Home() {
         project, roadmap, updates, pendingItems, clientUploads, agencyFiles,
         projectId, isDemo: false,
       });
+      localStorage.setItem('client_project_id', projectId);
       setView('dashboard');
     } catch (err) {
       console.error(err);
+      localStorage.removeItem('client_project_id');
       setError('Something went wrong. Please check your connection and try again.');
       setView('home');
     }
   };
+
+  useEffect(() => {
+    const savedProjectId = localStorage.getItem('client_project_id');
+    if (savedProjectId) {
+      handleSearch(savedProjectId);
+    } else {
+      setView('home');
+    }
+  }, []);
 
   const handleUpload = async (
     file: File,
@@ -102,6 +115,7 @@ export default function Home() {
   };
 
   const handleBack = () => {
+    localStorage.removeItem('client_project_id');
     setView('home');
     setData(null);
     setError(null);

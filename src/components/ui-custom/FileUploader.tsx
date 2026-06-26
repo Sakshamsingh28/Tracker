@@ -162,7 +162,7 @@ export default function FileUploader({
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full px-3 py-2.5 rounded-xl border border-gray-200/60 bg-white/50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-transparent transition-all cursor-pointer font-medium backdrop-blur-sm"
+          className="w-full px-3 py-2.5 rounded-xl border border-gray-200/60 bg-white/95 md:bg-white/50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-transparent transition-all cursor-pointer font-medium backdrop-blur-none md:backdrop-blur-sm"
         >
           {CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
@@ -201,7 +201,7 @@ export default function FileUploader({
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           onClick={() => inputRef.current?.click()}
-          className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all select-none backdrop-blur-sm
+          className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all select-none backdrop-blur-none md:backdrop-blur-sm
             ${dragging
               ? 'border-gray-900 bg-gray-900/[0.03]'
               : 'border-gray-200/60 hover:border-gray-300/80 hover:bg-white/40'
@@ -242,7 +242,7 @@ export default function FileUploader({
               placeholder="e.g. Acme Brand Guide, Raw Video Asset"
               value={linkName}
               onChange={(e) => setLinkName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
+              className="w-full px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/90 md:bg-white/40 backdrop-blur-none md:backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
             />
           </div>
           <div>
@@ -256,7 +256,7 @@ export default function FileUploader({
                 placeholder="e.g. https://drive.google.com/..."
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
+                className="flex-1 px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/90 md:bg-white/40 backdrop-blur-none md:backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
               />
               <button
                 type="submit"
@@ -330,7 +330,7 @@ export default function FileUploader({
                       const isData = u.fileURL && u.fileURL.startsWith('data:');
                       
                       return (
-                        <div key={u.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-white/40 bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
+                        <div key={u.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-white/40 bg-white/90 md:bg-white/40 backdrop-blur-none md:backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                           <div className="flex items-center gap-2.5 truncate">
                             {isLink ? (
                               <Paperclip size={13} className="text-gray-400 shrink-0" />

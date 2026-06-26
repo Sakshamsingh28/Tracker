@@ -119,7 +119,7 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           onClick={() => inputRef.current?.click()}
-          className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all select-none backdrop-blur-sm
+          className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all select-none backdrop-blur-none md:backdrop-blur-sm
             ${dragging
               ? 'border-gray-900 bg-gray-900/[0.03]'
               : 'border-gray-200/60 hover:border-gray-300/80 hover:bg-white/40'
@@ -160,7 +160,7 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
               placeholder="e.g. Brand Guidelines, Design Asset"
               value={linkName}
               onChange={(e) => setLinkName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
+              className="w-full px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/90 md:bg-white/40 backdrop-blur-none md:backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
             />
           </div>
           <div>
@@ -174,7 +174,7 @@ export default function AgencyFileUploader({ onUpload, onUploadLink }: AgencyFil
                 placeholder="e.g. https://drive.google.com/..."
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/40 backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
+                className="flex-1 px-3 py-2 border border-gray-200/60 rounded-lg text-xs bg-white/90 md:bg-white/40 backdrop-blur-none md:backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gray-900/20"
               />
               <button
                 type="submit"

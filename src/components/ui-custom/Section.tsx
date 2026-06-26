@@ -11,7 +11,7 @@ export default function Section({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-white/60 bg-white/70 backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-6 ${className}`}
+      className={`rounded-2xl border border-white/60 bg-white/95 md:bg-white/70 backdrop-blur-none md:backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-6 ${className}`}
     >
       <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">
         {title}

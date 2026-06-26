@@ -26,7 +26,7 @@ export default function AgencyFilesList({ files }: { files: AgencyFile[] }) {
             download={isData ? f.fileName : undefined}
             target={isData ? undefined : '_blank'}
             rel={isData ? undefined : 'noopener noreferrer'}
-            className="group flex items-center gap-3 px-3 py-2.5 rounded-lg border border-white/30 bg-white/30 backdrop-blur-sm hover:bg-white/50 transition-all shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]"
+            className="group flex items-center gap-3 px-3 py-2.5 rounded-lg border border-white/30 bg-white/90 md:bg-white/30 backdrop-blur-none md:backdrop-blur-sm hover:bg-white/50 transition-all shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]"
           >
             <FileTypeIcon name={f.fileName} />
             <span className="text-sm text-gray-700 truncate flex-1">{f.fileName}</span>

@@ -25,7 +25,7 @@ export default function RoadmapSection({ phases }: { phases: RoadmapPhase[] }) {
         const isOpen = openId === phase.id;
 
         return (
-          <div key={phase.id} className="rounded-xl border border-white/40 bg-white/20 backdrop-blur-sm overflow-hidden shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
+          <div key={phase.id} className="rounded-xl border border-white/40 bg-white/90 md:bg-white/20 backdrop-blur-none md:backdrop-blur-sm overflow-hidden shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
             <button
               onClick={() => setOpenId(isOpen ? null : phase.id)}
               className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-white/30 transition-colors"

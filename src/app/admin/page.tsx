@@ -21,6 +21,7 @@ export default function AdminPage() {
   // Auth state
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [authError, setAuthError] = useState('');
 
   // Projects state
@@ -56,17 +57,34 @@ export default function AdminPage() {
 
   const correctPasscode = process.env.NEXT_PUBLIC_ADMIN_PASSCODE || 'admin123';
 
+  // Check auth on mount
+  useEffect(() => {
+    const savedAuth = localStorage.getItem('admin_authenticated');
+    if (savedAuth === 'true') {
+      setIsAuthenticated(true);
+    }
+    setCheckingAuth(false);
+  }, []);
+
   // Load all projects on auth success
   useEffect(() => {
-    if (isAuthenticated) {
-      loadProjects();
-    }
+    const initProjects = async () => {
+      if (isAuthenticated) {
+        await loadProjects();
+        const savedSelId = localStorage.getItem('admin_selected_project_id');
+        if (savedSelId) {
+          setSelectedProjectId(savedSelId);
+        }
+      }
+    };
+    initProjects();
   }, [isAuthenticated]);
 
   // Load active project data on selection
   useEffect(() => {
     if (selectedProjectId) {
       loadProjectData(selectedProjectId);
+      localStorage.setItem('admin_selected_project_id', selectedProjectId);
     } else {
       setProjectForm(null);
       setRoadmap([]);
@@ -74,6 +92,7 @@ export default function AdminPage() {
       setPendingItems([]);
       setAgencyFiles([]);
       setClientUploads([]);
+      localStorage.removeItem('admin_selected_project_id');
     }
   }, [selectedProjectId]);
 
@@ -81,6 +100,7 @@ export default function AdminPage() {
     e.preventDefault();
     if (passcode === correctPasscode) {
       setIsAuthenticated(true);
+      localStorage.setItem('admin_authenticated', 'true');
       setAuthError('');
     } else {
       setAuthError('Incorrect passcode. Please try again.');
@@ -371,6 +391,14 @@ export default function AdminPage() {
   };
 
   // --- Login Render ---
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-100/50 to-zinc-50 flex items-center justify-center">
+        <Loader2 className="animate-spin text-gray-900" size={32} />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-100/50 to-zinc-50 flex flex-col items-center justify-center px-4">
@@ -427,7 +455,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-100/50 to-zinc-50 flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-md border-b border-gray-200/50 shadow-[0_2px_15px_0_rgba(0,0,0,0.02)]">
+      <header className="sticky top-0 z-20 bg-white/95 md:bg-white/70 backdrop-blur-none md:backdrop-blur-md border-b border-gray-200/50 shadow-[0_2px_15px_0_rgba(0,0,0,0.02)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
@@ -453,7 +481,11 @@ export default function AdminPage() {
               Back to Client site
             </a>
             <button 
-              onClick={() => setIsAuthenticated(false)}
+              onClick={() => {
+                setIsAuthenticated(false);
+                localStorage.removeItem('admin_authenticated');
+                localStorage.removeItem('admin_selected_project_id');
+              }}
               className="text-xs text-red-600 font-medium hover:underline bg-transparent border-0 cursor-pointer"
             >
               Log Out
@@ -467,7 +499,7 @@ export default function AdminPage() {
         
         {/* Left Sidebar: Projects List */}
         <aside className="w-full md:w-80 shrink-0">
-          <div className="border border-white/60 bg-white/70 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-4 flex flex-col h-[600px]">
+          <div className="border border-white/60 bg-white/95 md:bg-white/70 backdrop-blur-none md:backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-4 flex flex-col h-[600px]">
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">Projects</h2>
               <button
@@ -496,9 +528,9 @@ export default function AdminPage() {
                       setSelectedProjectId(p.id);
                       setIsCreatingProject(false);
                     }}
-                    className={`w-full text-left px-3 py-3 rounded-xl border transition-all flex flex-col gap-1.5 backdrop-blur-sm ${
+                    className={`w-full text-left px-3 py-3 rounded-xl border transition-all flex flex-col gap-1.5 backdrop-blur-none md:backdrop-blur-sm ${
                       selectedProjectId === p.id 
-                        ? 'border-gray-900/30 bg-white/60 shadow-sm' 
+                        ? 'border-gray-900/30 bg-white/90 md:bg-white/60 shadow-sm' 
                         : 'border-transparent hover:bg-white/30 hover:border-white/20'
                     }`}
                   >
@@ -522,7 +554,7 @@ export default function AdminPage() {
           
           {/* Create Project Panel */}
           {isCreatingProject ? (
-            <div className="border border-white/60 bg-white/70 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-6 max-w-xl">
+            <div className="border border-white/60 bg-white/95 md:bg-white/70 backdrop-blur-none md:backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-6 max-w-xl">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">Create a New Client Project</h2>
               <p className="text-xs text-gray-400 mb-6">This registers a document in Firestore. Clients login using the Unique ID.</p>
               
@@ -598,7 +630,7 @@ export default function AdminPage() {
           ) : selectedProjectId && projectForm ? (
             
             /* Main Project Editor */
-            <div className="border border-white/60 bg-white/70 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-6 flex flex-col">
+            <div className="border border-white/60 bg-white/95 md:bg-white/70 backdrop-blur-none md:backdrop-blur-md rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] p-6 flex flex-col">
               
               {/* Active Project Card Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-4 mb-6 gap-4">
@@ -899,7 +931,7 @@ export default function AdminPage() {
                             <p className="text-xs text-gray-400 italic py-4 text-center">No updates logged.</p>
                           ) : (
                             updates.map(upd => (
-                              <div key={upd.id} className="flex items-center justify-between p-3 border border-white/40 rounded-xl bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
+                              <div key={upd.id} className="flex items-center justify-between p-3 border border-white/40 rounded-xl bg-white/90 md:bg-white/40 backdrop-blur-none md:backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                                 <div className="space-y-0.5">
                                   <p className="font-semibold text-gray-900">{upd.title}</p>
                                   <p className="text-[10px] text-gray-400">{new Date(upd.date).toLocaleDateString()}</p>
@@ -946,7 +978,7 @@ export default function AdminPage() {
                             agencyFiles.map(file => {
                               const isData = file.fileURL && file.fileURL.startsWith('data:');
                               return (
-                                <div key={file.id} className="flex items-center justify-between p-2.5 border border-white/40 rounded-xl bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
+                                <div key={file.id} className="flex items-center justify-between p-2.5 border border-white/40 rounded-xl bg-white/90 md:bg-white/40 backdrop-blur-none md:backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                                   <span className="font-medium text-gray-700 flex items-center gap-1.5 truncate">
                                     <FileText size={12} className="text-gray-400 shrink-0" />
                                     {file.fileName}
@@ -991,7 +1023,7 @@ export default function AdminPage() {
                             clientUploads.map(upload => {
                               const isData = upload.fileURL && upload.fileURL.startsWith('data:');
                               return (
-                                <div key={upload.id} className="flex items-center justify-between p-2.5 border border-white/40 rounded-xl bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
+                                <div key={upload.id} className="flex items-center justify-between p-2.5 border border-white/40 rounded-xl bg-white/90 md:bg-white/40 backdrop-blur-none md:backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                                   <div className="space-y-0.5 truncate">
                                     <p className="font-semibold text-gray-700 truncate">{upload.fileName}</p>
                                     <div className="flex items-center gap-1.5 text-[9px] text-gray-400">
@@ -1057,7 +1089,7 @@ export default function AdminPage() {
                           <p className="text-xs text-gray-400 italic py-4 text-center">No action requests pending.</p>
                         ) : (
                           pendingItems.map(item => (
-                            <div key={item.id} className="flex items-center justify-between p-3 border border-white/40 rounded-xl bg-white/40 backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
+                            <div key={item.id} className="flex items-center justify-between p-3 border border-white/40 rounded-xl bg-white/90 md:bg-white/40 backdrop-blur-none md:backdrop-blur-sm text-xs shadow-[0_2px_12px_0_rgba(0,0,0,0.01)]">
                               <span className="font-medium text-gray-800">{item.item}</span>
                               <button
                                 onClick={() => handleDeletePendingItem(item.id)}
@@ -1078,7 +1110,7 @@ export default function AdminPage() {
             </div>
           ) : (
             /* Selected state placeholder */
-            <div className="h-[600px] border border-dashed border-gray-250/80 bg-white/30 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3">
+            <div className="h-[600px] border border-dashed border-gray-250/80 bg-white/90 md:bg-white/30 backdrop-blur-none md:backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3">
               <FolderOpen size={36} className="text-gray-300" />
               <div className="text-center">
                 <h3 className="text-sm font-semibold text-gray-900 mb-0.5">No Project Selected</h3>
